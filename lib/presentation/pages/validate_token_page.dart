@@ -1,4 +1,4 @@
-import 'package:bioprode/presentation/pages/validate_token_page.dart';
+import 'package:bioprode/presentation/pages/password_restore_page.dart';
 import 'package:flutter/material.dart';
 import '../../data/services/api_service_recovery_pass.dart';
 import '../widgets/custom_text_field.dart';
@@ -8,16 +8,16 @@ import '../../core/utils/validators.dart';
 import '../../core/themes/app_themes.dart';
 import '../../core/utils/environment.dart';
 
-class PasswordRecoveryPage extends StatefulWidget {
-  const PasswordRecoveryPage({Key? key}) : super(key: key);
+class ValidateTokenPage extends StatefulWidget {
+  const ValidateTokenPage({Key? key}) : super(key: key);
 
   @override
-  State<PasswordRecoveryPage> createState() => _PasswordRecoveryPageState();
+  State<ValidateTokenPage> createState() => _ValidateTokenPageState();
 }
 
-class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
+class _ValidateTokenPageState extends State<ValidateTokenPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _tokenController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _submitRecoveryRequest() async {
@@ -28,15 +28,16 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
     });
 
     try {
-      final response = await ApiService().requestPasswordRecovery(
-        _emailController.text.trim(),
+      final response = await ApiService().requestValidateToken(
+        _tokenController.text.trim()
       );
+      print(response['success']);
 
       if (response['success'] == true) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ValidateTokenPage(),
+            builder: (context) => PasswordRestorePage(token: _tokenController.text.trim()),
           ),
         );
       } else {
@@ -72,20 +73,19 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Ingresa tu correo electrónico y te enviaremos un enlace para recuperar tu contraseña',
+                'Ingresa el codigo que se te fue enviado via correo electronico',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 40),
               CustomTextField(
-                label: 'Correo Electrónico',
-                hintText: 'ejemplo@correo.com',
-                controller: _emailController,
-                validator: Validators.validateEmail,
-                keyboardType: TextInputType.emailAddress,
+                label: 'COdigo de verificación',
+                hintText: 'XXXXXXXX',
+                controller: _tokenController,
+    
               ),
               const SizedBox(height: 40),
               PrimaryButton(
-                text: 'Enviar Enlace de Recuperación',
+                text: 'Enviar codigo de recuperación',
                 onPressed: _submitRecoveryRequest,
                 isLoading: _isLoading,
                 isEnabled: true,
@@ -114,7 +114,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _tokenController.dispose();
     super.dispose();
   }
 }

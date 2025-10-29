@@ -1,23 +1,26 @@
-import 'package:bioprode/presentation/pages/validate_token_page.dart';
 import 'package:flutter/material.dart';
 import '../../data/services/api_service_recovery_pass.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/custom_snackbar.dart';
+import 'recovery_sent_page.dart';
 import '../../core/utils/validators.dart';
 import '../../core/themes/app_themes.dart';
 import '../../core/utils/environment.dart';
 
-class PasswordRecoveryPage extends StatefulWidget {
-  const PasswordRecoveryPage({Key? key}) : super(key: key);
+class PasswordRestorePage extends StatefulWidget {
+  final String token;
+  const PasswordRestorePage({Key? key, required this.token}) : super(key: key);
 
   @override
-  State<PasswordRecoveryPage> createState() => _PasswordRecoveryPageState();
+  State<PasswordRestorePage> createState() => _PasswordRecoveryPageState();
 }
 
-class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
+class _PasswordRecoveryPageState extends State<PasswordRestorePage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
+  bool _isPasswordVisible = false;
   bool _isLoading = false;
 
   Future<void> _submitRecoveryRequest() async {
@@ -28,19 +31,21 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
     });
 
     try {
-      final response = await ApiService().requestPasswordRecovery(
-        _emailController.text.trim(),
+      final response = await ApiService().requestPasswordReset(
+        _passwordController.text.trim(),
+        widget.token,
       );
 
       if (response['success'] == true) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => ValidateTokenPage(),
-          ),
+          MaterialPageRoute(builder: (context) => RecoverySentPage()),
         );
       } else {
-        CustomSnackbar.showError(context, response['message'] ?? 'Error desconocido');
+        CustomSnackbar.showError(
+          context,
+          response['message'] ?? 'Error desconocido',
+        );
       }
     } catch (e) {
       CustomSnackbar.showError(context, 'Error: $e');
@@ -72,20 +77,38 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Ingresa tu correo electrónico y te enviaremos un enlace para recuperar tu contraseña',
+                'Ingresa la nueva contraseña',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 40),
               CustomTextField(
-                label: 'Correo Electrónico',
-                hintText: 'ejemplo@correo.com',
-                controller: _emailController,
-                validator: Validators.validateEmail,
-                keyboardType: TextInputType.emailAddress,
+                label: 'Coloca tu nueva contraseña',
+                hintText: 'Nueva contraseña segura',
+                controller: _passwordController,
+                validator: Validators.validatePassword,
+                obscureText: true,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                label: 'Confirma tu nueva contraseña',
+                hintText: 'Repite tu contraseña',
+                controller: _passwordConfirmController,
+                validator: (value) => Validators.validatePasswordConfirmation(
+                  value,
+                  _passwordController.text,
+                ),
+                obscureText: true,
+                showPasswordToggle: true,
+                isPasswordVisible: _isPasswordVisible,
+                onSuffixIconPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
               ),
               const SizedBox(height: 40),
               PrimaryButton(
-                text: 'Enviar Enlace de Recuperación',
+                text: 'Restablecer contraseña',
                 onPressed: _submitRecoveryRequest,
                 isLoading: _isLoading,
                 isEnabled: true,
@@ -114,7 +137,8 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordConfirmController.dispose();
     super.dispose();
   }
 }
