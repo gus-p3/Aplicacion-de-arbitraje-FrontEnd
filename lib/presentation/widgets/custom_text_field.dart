@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class CustomTextField extends StatelessWidget {
   final String label;
   final String? hintText;
@@ -10,6 +9,11 @@ class CustomTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final Widget? suffixIcon;
   final int? maxLines;
+  final IconData? prefixIcon;
+  final VoidCallback? onPrefixIconPressed;
+  final VoidCallback? onSuffixIconPressed;
+  final bool showPasswordToggle;
+  final bool isPasswordVisible;
 
   const CustomTextField({
     Key? key,
@@ -21,6 +25,11 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.suffixIcon,
     this.maxLines = 1,
+    this.prefixIcon,
+    this.onPrefixIconPressed,
+    this.onSuffixIconPressed,
+    this.showPasswordToggle = false,
+    this.isPasswordVisible = false,
   }) : super(key: key);
 
   @override
@@ -39,15 +48,42 @@ class CustomTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           validator: validator,
-          obscureText: obscureText,
+          obscureText: obscureText && !isPasswordVisible,
           keyboardType: keyboardType,
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hintText,
-            suffixIcon: suffixIcon,
+            prefixIcon: prefixIcon != null
+                ? IconButton(
+                    icon: Icon(prefixIcon),
+                    onPressed: onPrefixIconPressed,
+                  )
+                : null,
+            suffixIcon: _buildSuffixIcon(),
           ),
         ),
       ],
     );
+  }
+
+  Widget? _buildSuffixIcon() {
+    if (showPasswordToggle) {
+      return IconButton(
+        icon: Icon(
+          isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+          color: Colors.grey[600],
+        ),
+        onPressed: onSuffixIconPressed,
+      );
+    }
+    
+    if (suffixIcon != null && onSuffixIconPressed != null) {
+      return IconButton(
+        icon: suffixIcon!,
+        onPressed: onSuffixIconPressed,
+      );
+    }
+    
+    return suffixIcon;
   }
 }
