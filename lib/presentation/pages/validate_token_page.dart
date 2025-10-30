@@ -4,7 +4,6 @@ import '../../data/services/api_service_recovery_pass.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/custom_snackbar.dart';
-import '../../core/utils/validators.dart';
 import '../../core/themes/app_themes.dart';
 import '../../core/utils/environment.dart';
 
