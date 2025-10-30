@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Environment {
-  static String get appName => dotenv.get('APP_NAME', fallback: 'Sistema Liga');
+  static String get appName => dotenv.get('APP_NAME', fallback: 'APA_Bioprode');
   static String get apiBaseUrl =>
       dotenv.get('API_BASE_URL');
   static Color get primaryColor =>
