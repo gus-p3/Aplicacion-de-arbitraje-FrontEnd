@@ -31,7 +31,6 @@ class _RegistroOrganizadorScreenState extends State<RegistroOrganizadorScreen> {
   final _redesController = TextEditingController();
 
   DateTime? _fechaNacimiento;
-  DateTime? _fechaCreacionOrg; // Nueva fecha para la organización
   String _sexo = 'H';
   bool _isLoading = false;
   bool _obscurePassword = true;
